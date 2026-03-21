@@ -274,37 +274,68 @@ c.interface.fragments
 
 ---
 
-## 8. Interact: Hardhat console commands per contract
+## 8. Interact with deployed contracts (Hardhat console)
 
-**Setup (once per session):**
-
-```bash
-cd /path/to/learning-solidity
-pnpm exec hardhat console --network fuji
-```
-
-Replace `addr` with the **contract address** from `deployments/fuji.json` for that contract name. Pattern:
-
-```js
-const addr = "0xYOUR_CONTRACT_ADDRESS_HERE";
-const c = await ethers.getContractAt("ContractName", addr);
-```
-
-Below, **`c`** is the contract instance. Use the **`ContractName`** shown in each block.
+This section shows **detailed steps** first, then **per-contract** commands.
 
 ---
 
-### Learning contracts (`learning/`)
+### 8.1 Step-by-step (every contract)
 
-#### `Intro`
+Follow these in order. Use **Fuji** as the example; for **local Hardhat** use `--network hardhat` and `deployments/hardhat.json`; for **`localhost`** use `--network localhost` and `deployments/localhost.json`.
+
+| Step | What to do |
+|------|------------|
+| **1** | **Deploy** the contract (if you haven’t already), e.g. `export CONTRACT_NAME=Intro` then `pnpm run deploy:fuji` (see **§4**). |
+| **2** | Find the **contract address** — **not** your wallet. From the deploy log: **`ContractName deployed to: 0x...`**, or open **`deployments/fuji.json`** (or the matching network file) and copy **`contracts.<ContractName>.address`**. |
+| **3** | Confirm you are **not** using the line **Deploying with account: 0x...** — that is your **wallet**; **wrong** for `getContractAt`. |
+| **4** | Open the **Hardhat console** (JavaScript REPL), **not** the normal shell: `pnpm exec hardhat console --network fuji`. Wait until you see the **`>`** prompt. You cannot run `const` in **zsh** (`command not found`). |
+| **5** | Fix **`PRIVATE_KEY`** in **`.env`** (64 hex chars) if you see warnings, or run: `PRIVATE_KEY=0x... pnpm exec hardhat console --network fuji`. |
+| **6** | Set the address **once** per session: `const addr = "0x..."` — **exactly** `0x` + 40 hex characters, **no** dot or extra character at the end. |
+| **7** | Attach: `const c = await ethers.getContractAt("ContractName", addr)` — **`ContractName`** must match the Solidity contract (e.g. `Intro`, `LocalVariables`). |
+| **8** | Call functions: `await c.someFunction(...)`. Use **`0n` / `123n`** for bigint args (ethers v6). |
+| **9** | If you see **`Identifier 'addr' has already been declared`**, exit the console (**Ctrl+D** or `.exit`) and start again, **or** use new names: `const introAddr = "0x..."`, `const intro = await ethers.getContractAt("Intro", introAddr)`. |
+
+**Minimal template (copy after `>`):**
 
 ```js
+const addr = "0xPASTE_CONTRACT_ADDRESS_FROM_deployments_fuji.json";
+const c = await ethers.getContractAt("ContractName", addr);
+```
+
+Then use the **per-contract** commands below (replace `ContractName` / calls as needed).
+
+---
+
+### 8.2 Learning contracts (`learning/`)
+
+For each lesson: deploy with **`CONTRACT_NAME`** = **Contract name** column, then use **`address`** from `deployments/<network>.json` for that contract key.
+
+---
+
+#### `Intro` — `learning/1-Intro/Intro.sol`
+
+| | |
+|--|--|
+| **Deploy** | `export CONTRACT_NAME=Intro` → `pnpm run deploy:fuji` (or **§4** local commands) |
+| **Address in JSON** | `contracts.Intro.address` |
+| **Interact** | |
+
+```js
+const addr = "0x..."; // contracts.Intro.address
 const c = await ethers.getContractAt("Intro", addr);
 await c.helloWorld();
 await c.sayHello();
 ```
 
-#### `StateVariables`
+---
+
+#### `StateVariables` — `learning/2-State-Variables/StateVariables.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=StateVariables` |
+| **Address** | `contracts.StateVariables.address` |
 
 ```js
 const c = await ethers.getContractAt("StateVariables", addr);
@@ -313,7 +344,14 @@ await c.owner();
 await c.paused();
 ```
 
-#### `LocalVariables`
+---
+
+#### `LocalVariables` — `learning/3-Local-Variables/LocalVariables.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=LocalVariables` (not `Local-Variables`) |
+| **Address** | `contracts.LocalVariables.address` |
 
 ```js
 const c = await ethers.getContractAt("LocalVariables", addr);
@@ -321,7 +359,14 @@ await c.add(3n, 7n);
 await c.getBlockInfo();
 ```
 
-#### `Functions`
+---
+
+#### `Functions` — `learning/4-Function/Functions.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Functions` |
+| **Address** | `contracts.Functions.address` |
 
 ```js
 const c = await ethers.getContractAt("Functions", addr);
@@ -331,7 +376,14 @@ await c.add(10n, 20n);
 await c.value();
 ```
 
-#### `Constructor` (contract name is `Constructor`)
+---
+
+#### `Constructor` — `learning/5-Constructor/Constructor.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Constructor` |
+| **Address** | `contracts.Constructor.address` |
 
 ```js
 const c = await ethers.getContractAt("Constructor", addr);
@@ -339,7 +391,14 @@ await c.owner();
 await c.createdAt();
 ```
 
-#### `DataTypes`
+---
+
+#### `DataTypes` — `learning/6-Data-Types/DataTypes.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=DataTypes` |
+| **Address** | `contracts.DataTypes.address` |
 
 ```js
 const c = await ethers.getContractAt("DataTypes", addr);
@@ -352,7 +411,14 @@ await c.data();
 await c.text();
 ```
 
-#### `Array`
+---
+
+#### `Array` — `learning/7-Array/Array.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Array` |
+| **Address** | `contracts.Array.address` |
 
 ```js
 const c = await ethers.getContractAt("Array", addr);
@@ -363,7 +429,14 @@ await c.fixedArray(0n);
 await c.dynamicArray(0n);
 ```
 
-#### `Loops`
+---
+
+#### `Loops` — `learning/8-Loops/Loops.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Loops` |
+| **Address** | `contracts.Loops.address` |
 
 ```js
 const c = await ethers.getContractAt("Loops", addr);
@@ -372,7 +445,14 @@ await c.sum();
 await c.numbers(0n);
 ```
 
-#### `Conditionals`
+---
+
+#### `Conditionals` — `learning/9-Conditionals/Conditionals.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Conditionals` |
+| **Address** | `contracts.Conditionals.address` |
 
 ```js
 const c = await ethers.getContractAt("Conditionals", addr);
@@ -381,7 +461,14 @@ await c.onlyPositive(1n);
 await c.min(3n, 7n);
 ```
 
-#### `Struct`
+---
+
+#### `Struct` — `learning/10-Struct/Struct.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Struct` |
+| **Address** | `contracts.Struct.address` |
 
 ```js
 const c = await ethers.getContractAt("Struct", addr);
@@ -390,7 +477,15 @@ await c.people(0n);
 await c.get(0n);
 ```
 
-#### `Mapping` (sending AVAX for `deposit` — uses your signer’s balance)
+---
+
+#### `Mapping` — `learning/11-Mapping/Mapping.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Mapping` |
+| **Address** | `contracts.Mapping.address` |
+| **Note** | `deposit` requires **AVAX** (payable); use a signer with Fuji balance on the contract’s network. |
 
 ```js
 const c = await ethers.getContractAt("Mapping", addr);
@@ -401,7 +496,14 @@ await c.balances(signer.address);
 await c.hasDeposited(signer.address);
 ```
 
-#### `StorageLocations`
+---
+
+#### `StorageLocations` — `learning/12-Storage-Locations/StorageLocations.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=StorageLocations` |
+| **Address** | `contracts.StorageLocations.address` |
 
 ```js
 const c = await ethers.getContractAt("StorageLocations", addr);
@@ -411,27 +513,48 @@ await c.concat("foo", "bar");
 await c.stored();
 ```
 
-#### `GlobalVariables` (`getGlobals` is **payable** — pass `value`, can be `0`)
+---
+
+#### `GlobalVariables` — `learning/13-Global-Variables/GlobalVariables.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=GlobalVariables` |
+| **Address** | `contracts.GlobalVariables.address` |
+| **Note** | `getGlobals` is **payable** — pass `{ value: 0n }` or a small wei amount. |
 
 ```js
 const c = await ethers.getContractAt("GlobalVariables", addr);
 const [signer] = await ethers.getSigners();
 await c.connect(signer).getGlobals({ value: 0n });
-// optional: send a small amount (wei) to see `value` in the return tuple
 await c.connect(signer).getGlobals({ value: 1n });
 ```
 
-#### `ContractBalance` (send AVAX to fund the contract)
+---
+
+#### `ContractBalance` — `learning/14-Contract-Balance/ContractBalance.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=ContractBalance` |
+| **Address** | `contracts.ContractBalance.address` |
+| **Note** | Send AVAX via `deposit` or to the contract address (`receive`). |
 
 ```js
 const c = await ethers.getContractAt("ContractBalance", addr);
 const [signer] = await ethers.getSigners();
 await c.connect(signer).deposit({ value: ethers.parseEther("0.01") });
 await c.getBalance();
-// or transfer AVAX to the contract address (triggers receive)
 ```
 
-#### `Visibility`
+---
+
+#### `Visibility` — `learning/15-Visibility/Visibility.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=Visibility` |
+| **Address** | `contracts.Visibility.address` |
 
 ```js
 const c = await ethers.getContractAt("Visibility", addr);
@@ -444,9 +567,14 @@ await c.externalFn(5n);
 
 ---
 
-### Starter contracts (`contracts/`)
+### 8.3 Starter contracts (`contracts/`)
 
-#### `SimpleStorage`
+#### `SimpleStorage` — `contracts/SimpleStorage.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=SimpleStorage` |
+| **Address** | `contracts.SimpleStorage.address` |
 
 ```js
 const c = await ethers.getContractAt("SimpleStorage", addr);
@@ -454,15 +582,31 @@ await c.get();
 await c.set(123n);
 ```
 
-#### `AvalancheGreeter`
+---
+
+#### `AvalancheGreeter` — `contracts/AvalancheGreeter.sol`
+
+| | |
+|--|--|
+| **Deploy** | `CONTRACT_NAME=AvalancheGreeter` (+ `GREETING` if needed) |
+| **Address** | `contracts.AvalancheGreeter.address` |
+| **Note** | Only **owner** (deployer) can `setGreeting`. |
 
 ```js
 const c = await ethers.getContractAt("AvalancheGreeter", addr);
 await c.greeting();
 await c.owner();
 await c.getGreeting();
-// only the owner can set (your deployer wallet)
 await c.setGreeting("Hi from console");
+```
+
+---
+
+### 8.4 Console setup (one line)
+
+```bash
+cd /path/to/learning-solidity
+pnpm exec hardhat console --network fuji
 ```
 
 ---
@@ -475,6 +619,37 @@ await c.setGreeting("Hi from console");
   `c.interface.fragments.filter((f) => f.type === "function").map((f) => f.name)`
 - Use **`--network localhost`** and addresses from `deployments/localhost.json` if you run a local node.
 
+### Common console mistakes (`addr`, `c`, `PRIVATE_KEY`)
+
+**`ReferenceError: addr is not defined`**  
+`addr` in the examples is a **placeholder**. You must define it with your **real deployed contract address** (from `deployments/fuji.json` under `contracts.<ContractName>.address`, or from the deploy log: `Intro deployed to: 0x...`).
+
+```js
+const addr = "0xYourRealContractAddressHere";
+const c = await ethers.getContractAt("Intro", addr);
+await c.helloWorld();
+await c.sayHello();
+```
+
+**`TypeError: Cannot read properties of undefined (reading 'helloWorld')`**  
+Usually means `c` was never created — e.g. the previous line failed because `addr` was missing or wrong. Fix `addr`, run `getContractAt` again, then call functions on `c`.
+
+**`[hardhat] PRIVATE_KEY is invalid or too short` when opening the console**  
+Your `.env` `PRIVATE_KEY` is missing, a placeholder, or not 64 hex characters. Fix `.env`, **or** pass a valid key for that session only:
+
+```bash
+PRIVATE_KEY=0xYOUR_64_HEX_KEY pnpm exec hardhat console --network fuji
+```
+
+View/pure calls may work in some cases without a funded signer, but you should still use a **valid** key for Fuji so Hardhat’s accounts match your expectations.
+
+**Quick checklist**
+
+1. Get the address from **`deployments/fuji.json`** (or the network you used) for that contract name.  
+2. `const addr = "0x..."` — paste that full address.  
+3. `const c = await ethers.getContractAt("ContractName", addr)` — `ContractName` must match Solidity (e.g. `Intro`, `LocalVariables`).  
+4. Then `await c.someFunction()`.
+
 ---
 
 ## 9. Troubleshooting
@@ -485,7 +660,10 @@ await c.setGreeting("Hi from console");
 | `HH8` / private key too short | Key must be **64 hex characters** (not a placeholder). |
 | `Missing deployments/fuji.json` | Run **deploy** to Fuji first, or use `CONTRACT_ADDRESS` + `CONTRACT_NAME` for verify. |
 | `resolveName` / `getContractAt` fails | Use a **real** contract address (42 chars starting with `0x`), not `0xYOUR_ADDRESS` from docs. |
-| Wrong `CONTRACT_NAME` | Must match the Solidity **contract** name (`Intro`, not `1-Intro`). |
+| Wrong `CONTRACT_NAME` | Must match the Solidity **contract** name (`Intro`, not `1-Intro`). Use **`LocalVariables`**, not `Local-Variables`. |
+| `addr is not defined` (console) | Set `const addr = "0x..."` first using the address from **`deployments/fuji.json`** (see **§8 — Common console mistakes**). |
+| `Cannot read properties of undefined (reading '…')` on `c` | `getContractAt` failed — fix `addr` and contract name, then define `c` again. |
+| Env vars not applied to deploy | Put **`CONTRACT_NAME=... PRIVATE_KEY=... pnpm run deploy:fuji`** on **one line** (no newline before `pnpm`). Typo: **`CONTRACT_NAME`**, not `ONTRACT_NAME`. |
 
 ---
 
