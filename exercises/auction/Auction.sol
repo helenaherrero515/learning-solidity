@@ -15,12 +15,45 @@ pragma solidity ^0.8.20;
  */
 contract Auction {
     // TODO: your state variables
-
+    address public owner;
+    address public beneficiary;
+    address public highestBidder;
+    uint256 public highestBid;
+    bool public ended;
     // TODO: your events
-
+    event BidPlaced(address indexed bidder, uint256 amount);
+    event AuctionEnded( address indexed winner, uint256 amount);
     // TODO: constructor(beneficiary)
-
+    constructor(address _beneficiary) {
+        require(_beneficiary != address(0), "Beneficiary cannot be zero address");
+        owner = msg.sender;
+        beneficiary = _beneficiary;
+    }
     // TODO: function bid() external payable
+    function bid() external payable {
+        require(!ended, "Auction has ended");
+        require(msg.value > highestBid, "Bid too low");
 
+        if (highestBidder != address(0)) {
+            payable(highestBidder).transfer(highestBid);
+        }
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+
+        emit BidPlaced(msg.sender, msg.value);
+    }
     // TODO: function endAuction() external
+    function endAuction() external {
+        require(msg.sender == owner, "Only owner can end auction");
+        require(!ended, "Auction has already ended");
+
+        ended = true;
+        payable(beneficiary).transfer(highestBid);
+        
+        emit AuctionEnded(highestBidder, highestBid);
+    }
+
+    receive() external payable {
+        revert("Use bid() function to participate in auction");
+    }
 }
